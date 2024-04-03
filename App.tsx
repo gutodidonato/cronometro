@@ -7,46 +7,54 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-
 import { useState } from "react";
 
-export default function App() {
-  let ss = 0;
-  let mm = 0;
-  let hh = 0;
+let timer = false;
+let temporizador: NodeJS.Timeout | undefined;
+let ss = 0;
+let mm = 0;
+let hh = 0;
 
-  let timer = true;
-  const [tempo, setTempo] = useState(`${hh}:${mm}:${ss}`);
+export default function App() {
+  const [tempo, setTempo] = useState("00:00:00");
   const [tempoGravado, setTempoGravado] = useState("");
   const [texto, setTexto] = useState("Iniciar");
 
   function contador() {
     if (timer) {
-      const tempo = setInterval(contador, 1000);
-      ss += 1;
+      ss++;
       if (ss >= 60) {
         ss = 0;
-        mm += 1;
+        mm++;
         if (mm >= 60) {
+          hh++;
           mm = 0;
-          hh += 1;
         }
       }
       setTempo(`${hh}:${mm}:${ss}`);
-    } else {
-      clearInterval(tempo);
     }
   }
 
   function iniciarContagem() {
-    if (texto == "Iniciar") {
-      setTexto("Pausar");
-      timer = true;
-      contador();
-    } else {
+    if (timer) {
+      clearInterval(temporizador);
       setTexto("Iniciar");
-      timer != timer;
+      timer = false;
+    } else {
+      temporizador = setInterval(contador, 1000);
+      setTexto("Parar");
+      timer = true;
     }
+  }
+  function zerarContador() {
+    setTempo("00:00:00");
+    ss = 0;
+    mm = 0;
+    hh = 0;
+  }
+  function gravarTempo() {
+    let tempoAtual = `Ultimo tempo: ${hh}:${mm}:${ss}`;
+    setTempoGravado(tempoAtual);
   }
 
   return (
@@ -60,10 +68,14 @@ export default function App() {
           <Text style={styles.botaoTexto}>{texto}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.botao}>
-          <Text style={styles.botaoTexto}>Reiniciar</Text>
+          <Text style={styles.botaoTexto} onPress={zerarContador}>
+            Reiniciar
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.botao}>
-          <Text style={styles.botaoTexto}>Acumular</Text>
+          <Text style={styles.botaoTexto} onPress={gravarTempo}>
+            Acumular
+          </Text>
         </TouchableOpacity>
       </View>
 
